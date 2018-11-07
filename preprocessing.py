@@ -1,9 +1,9 @@
-from PIL import Image
+import os, glob
 import cv2
 import numpy as np
 import math
 from scipy import ndimage
-
+from PIL import Image
 
 def getBestShift(img):
     cy, cx = ndimage.measurements.center_of_mass(img)
@@ -21,21 +21,25 @@ def shift(img, sx, sy):
     return shifted
 
 
-# create an array where we can store our 10 pictures
-images = np.zeros((10, 784))
-# and the correct values
-correct_vals = np.zeros((10, 10))
+# # create an array where we can store our 10 pictures
+# images = np.zeros((10, 784))
+# # and the correct values
+# correct_vals = np.zeros((10, 10))
 
-# we want to test our images which you saw at the top of this page
-i = 0
-for no in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
-    # read the image
-    image = cv2.imread("./data/digits/"+str(no)+".png", cv2.IMREAD_UNCHANGED)
-    print(image)
+# i = 0
+
+folder = './data/digits'
+for filename in os.listdir(folder):
+    img = cv2.imread(os.path.join(folder,filename))
+    if img is not None:
+        image.append(img)
+# for no in [0,1,2,4,5,6,7,9,10,11,12,14,15,25,26,27,28,29,30,31,35,36,37,38,39,40,41,43,44,45]:
+    # # read the image
+    # image = cv2.imread("./data/digits/"+str(no)+".png", cv2.IMREAD_GRAYSCALE)
 
     # resize the images and invert it (black background)
     image = cv2.resize(255 - image, (28, 28))
-    print(image.shape)
+
     while np.sum(image[0]) == 0:
         image = image[1:]
 
@@ -72,23 +76,13 @@ for no in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
     shiftx, shifty = getBestShift(image)
     shifted = shift(image, shiftx, shifty)
     image = shifted
+
     # save the processed images
-    cv2.imwrite("./data/preprocessed/"+str(no)+".png", image)
-    """
-    all images in the training set have an range from 0-1
-    and not from 0-255 so we divide our flatten images
-    (a one dimensional vector with our 784 pixels)
-    to use the same 0-1 based range
-    """
-    flatten = image.flatten() / 255.0
-    """
-    we need to store the flatten image and generate
-    the correct_vals array
-    correct_val for the first digit (9) would be
-    [0,0,0,0,0,0,0,0,0,1]
-    """
-    images[i] = flatten
-    correct_val = np.zeros((10))
-    correct_val[no] = 1
-    correct_vals[i] = correct_val
-    i += 1
+    cv2.imwrite("./data/preprocessed/"+str(file)+".png", image)
+
+    # flatten = image.flatten() / 255.0
+    # images[i] = flatten
+    # correct_val = np.zeros((10))
+    # correct_val[no] = 1
+    # correct_vals[i] = correct_val
+    # i += 1
