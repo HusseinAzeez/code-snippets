@@ -27,58 +27,54 @@ def shift(img, sx, sy):
 # correct_vals = np.zeros((10, 10))
 
 # i = 0
-
-folder = './data/digits'
-for filename in os.listdir(folder):
-    img = cv2.imread(os.path.join(folder,filename))
-    if img is not None:
-        image.append(img)
 # for no in [0,1,2,4,5,6,7,9,10,11,12,14,15,25,26,27,28,29,30,31,35,36,37,38,39,40,41,43,44,45]:
+for img in glob.glob("./data/digits/*.png"):
     # # read the image
-    # image = cv2.imread("./data/digits/"+str(no)+".png", cv2.IMREAD_GRAYSCALE)
+    image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
+    cv2.imshow('Image', image)
+    if (image is not None):
+        # resize the images and invert it (black background)
+        image = cv2.resize(255 - image, (28, 28))
 
-    # resize the images and invert it (black background)
-    image = cv2.resize(255 - image, (28, 28))
+        while np.sum(image[0]) == 0:
+            image = image[1:]
 
-    while np.sum(image[0]) == 0:
-        image = image[1:]
+        while np.sum(image[:, 0]) == 0:
+            image = np.delete(image, 0, 1)
 
-    while np.sum(image[:, 0]) == 0:
-        image = np.delete(image, 0, 1)
+        while np.sum(image[-1]) == 0:
+            image = image[:-1]
 
-    while np.sum(image[-1]) == 0:
-        image = image[:-1]
+        while np.sum(image[:, -1]) == 0:
+            image = np.delete(image, -1, 1)
 
-    while np.sum(image[:, -1]) == 0:
-        image = np.delete(image, -1, 1)
+        rows, cols = image.shape
 
-    rows, cols = image.shape
+        if rows > cols:
+            factor = 20.0/rows
+            rows = 20
+            cols = int(round(cols*factor))
+            # first cols than rows
+            image = cv2.resize(image, (cols, rows))
+        else:
+            factor = 20.0/cols
+            cols = 20
+            rows = int(round(rows*factor))
+            # first cols than rows
+            image = cv2.resize(image, (cols, rows))
 
-    if rows > cols:
-        factor = 20.0/rows
-        rows = 20
-        cols = int(round(cols*factor))
-        # first cols than rows
-        image = cv2.resize(image, (cols, rows))
-    else:
-        factor = 20.0/cols
-        cols = 20
-        rows = int(round(rows*factor))
-        # first cols than rows
-        image = cv2.resize(image, (cols, rows))
+        colsPadding = (int(math.ceil((28-cols)/2.0)),
+                    int(math.floor((28-cols)/2.0)))
+        rowsPadding = (int(math.ceil((28-rows)/2.0)),
+                    int(math.floor((28-rows)/2.0)))
+        image = np.lib.pad(image, (rowsPadding, colsPadding), 'constant')
 
-    colsPadding = (int(math.ceil((28-cols)/2.0)),
-                   int(math.floor((28-cols)/2.0)))
-    rowsPadding = (int(math.ceil((28-rows)/2.0)),
-                   int(math.floor((28-rows)/2.0)))
-    image = np.lib.pad(image, (rowsPadding, colsPadding), 'constant')
+        shiftx, shifty = getBestShift(image)
+        shifted = shift(image, shiftx, shifty)
+        image = shifted
 
-    shiftx, shifty = getBestShift(image)
-    shifted = shift(image, shiftx, shifty)
-    image = shifted
-
-    # save the processed images
-    cv2.imwrite("./data/preprocessed/"+str(file)+".png", image)
+        # save the processed images
+        cv2.imwrite("./data/preprocessed/"+str(img)+".png", image)
 
     # flatten = image.flatten() / 255.0
     # images[i] = flatten
