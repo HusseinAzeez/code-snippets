@@ -1,9 +1,11 @@
-import os, glob
+import os
+import glob
 import cv2
 import numpy as np
 import math
 from scipy import ndimage
 from PIL import Image
+
 
 def getBestShift(img):
     cy, cx = ndimage.measurements.center_of_mass(img)
@@ -26,12 +28,10 @@ def shift(img, sx, sy):
 # # and the correct values
 # correct_vals = np.zeros((10, 10))
 
-# i = 0
-# for no in [0,1,2,4,5,6,7,9,10,11,12,14,15,25,26,27,28,29,30,31,35,36,37,38,39,40,41,43,44,45]:
+i = 0
 for img in glob.glob("./data/digits/*.png"):
     # # read the image
     image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
-    cv2.imshow('Image', image)
     if (image is not None):
         # resize the images and invert it (black background)
         image = cv2.resize(255 - image, (28, 28))
@@ -64,9 +64,9 @@ for img in glob.glob("./data/digits/*.png"):
             image = cv2.resize(image, (cols, rows))
 
         colsPadding = (int(math.ceil((28-cols)/2.0)),
-                    int(math.floor((28-cols)/2.0)))
+                       int(math.floor((28-cols)/2.0)))
         rowsPadding = (int(math.ceil((28-rows)/2.0)),
-                    int(math.floor((28-rows)/2.0)))
+                       int(math.floor((28-rows)/2.0)))
         image = np.lib.pad(image, (rowsPadding, colsPadding), 'constant')
 
         shiftx, shifty = getBestShift(image)
@@ -74,11 +74,11 @@ for img in glob.glob("./data/digits/*.png"):
         image = shifted
 
         # save the processed images
-        cv2.imwrite("./data/preprocessed/"+str(img)+".png", image)
+        cv2.imwrite("./data/preprocessed/"+str(i)+".png", image)
 
     # flatten = image.flatten() / 255.0
     # images[i] = flatten
     # correct_val = np.zeros((10))
     # correct_val[no] = 1
     # correct_vals[i] = correct_val
-    # i += 1
+    i += 1
