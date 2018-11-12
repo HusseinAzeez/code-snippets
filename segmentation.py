@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
 
-image = cv2.imread('./data/testing/out1.png', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('./data/roi/roi_1.png', cv2.IMREAD_UNCHANGED)
 blur = cv2.GaussianBlur(image, (15, 15), 0)
-thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 75, 40)
+thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 75, 25)
 bit = cv2.bitwise_not(thresh)
 _, contours, hierarchy = cv2.findContours(bit, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
-0
+
 for i in range(0, len(contours)):
     cnt = contours[i]
     x, y, w, h = cv2.boundingRect(cnt)
