@@ -23,15 +23,10 @@ def shift(img, sx, sy):
     return shifted
 
 
-# # create an array where we can store our 10 pictures
-# images = np.zeros((10, 784))
-# # and the correct values
-# correct_vals = np.zeros((10, 10))
-
 i = 0
 for img in glob.glob("./data/digits/*.png"):
     # # read the image
-    image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
+    image = cv2.imread(img, cv2.IMREAD_UNCHANGED)
     if (image is not None):
         # resize the images and invert it (black background)
         image = cv2.resize(255 - image, (28, 28))
@@ -76,9 +71,4 @@ for img in glob.glob("./data/digits/*.png"):
         # save the processed images
         cv2.imwrite("./data/preprocessed/"+str(i)+".png", image)
 
-    # flatten = image.flatten() / 255.0
-    # images[i] = flatten
-    # correct_val = np.zeros((10))
-    # correct_val[no] = 1
-    # correct_vals[i] = correct_val
     i += 1
