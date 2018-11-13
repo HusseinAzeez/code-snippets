@@ -37,6 +37,6 @@ def segment():
                 cv2.imwrite("./data/digits/"+str(no)+"_"+str(i)+".png", digit)
 
 
-full = cv2.imread('./data/raw/full5.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full5.tiff', cv2.IMREAD_GRAYSCALE)
 crop(full)
 segment()
