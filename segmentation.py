@@ -31,12 +31,16 @@ def segment():
 
             for i in range(0, len(contours)):
                 cnt = contours[i]
-                x, y, w, h = cv2.boundingRect(cnt)
-                cv2.rectangle(image, (x, y), (x+w, y+h), (255, 255, 255), 1)
-                digit = image[y:y+h, x:x+w]
-                cv2.imwrite("./data/digits/"+str(no)+"_"+str(i)+".png", digit)
+                if (cv2.contourArea(cnt) > 50):
+                    x, y, w, h = cv2.boundingRect(cnt)
+                    if (h > 25 and w > 18):
+                        cv2.rectangle(image, (x, y), (x+w, y+h), (255, 255, 255), 1)
+                        digit = image[y:y+h, x:x+w]
+                        cv2.imshow('Regions of Interests', image)
+                        cv2.imwrite("./data/digits/"+str(no)+"_"+str(i)+".png", digit)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-
-full = cv2.imread('../raw/full5.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full18.tiff', cv2.IMREAD_GRAYSCALE)
 crop(full)
 segment()
