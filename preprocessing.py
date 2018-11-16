@@ -1,5 +1,5 @@
 '''
-    Autor: Eraser
+    Author: Eraser
 '''
 import cv2
 import numpy as np
@@ -7,7 +7,6 @@ import glob
 import pathlib
 import math
 from scipy import ndimage
-
 # Delete existed images from last PDF
 
 
@@ -16,6 +15,9 @@ def clear():
         path = pathlib.Path(file)
         path.unlink()
     for file in glob.glob("./data/roi/*.png"):
+        path = pathlib.Path(file)
+        path.unlink()
+    for file in glob.glob("./data/preprocessed/*.png"):
         path = pathlib.Path(file)
         path.unlink()
 
@@ -51,21 +53,22 @@ def segment():
             _, contours, hierarchy = cv2.findContours(
                 bit, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
 
+            # sort contours
+            sort_contours = sorted(contours, key=lambda x: cv2.contourArea(x))
             # Draw a rectangle for each contour
-            for i in range(0, len(contours)):
-                cnt = contours[i]
+            for i in range(0, len(sort_contours)):
+                cnt = sort_contours[i]
                 if (cv2.contourArea(cnt) > 120):
                     x, y, w, h = cv2.boundingRect(cnt)
                     if (h > 20 and w > 20):
                         cv2.rectangle(image, (x, y), (x+w, y+h),
-                                      (255, 255, 255), 1)
+                                      (0, 0, 255), 1)
                         digit = image[y:y+h, x:x+w]
                         # cv2.imshow('Regions of Interests', image)
                         cv2.imwrite("./data/digits/" +
                                     str(region) + "_"+str(i)+".png", digit)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
 
 def getBestShift(img):
     cy, cx = ndimage.measurements.center_of_mass(img)
@@ -81,6 +84,7 @@ def shift(img, sx, sy):
     M = np.float32([[1, 0, sx], [0, 1, sy]])
     shifted = cv2.warpAffine(img, M, (cols, rows))
     return shifted
+
 
 def resize():
     i = 0
@@ -119,9 +123,9 @@ def resize():
                 image = cv2.resize(image, (cols, rows))
 
             colsPadding = (int(math.ceil((28-cols)/2.0)),
-                        int(math.floor((28-cols)/2.0)))
+                           int(math.floor((28-cols)/2.0)))
             rowsPadding = (int(math.ceil((28-rows)/2.0)),
-                        int(math.floor((28-rows)/2.0)))
+                           int(math.floor((28-rows)/2.0)))
             image = np.lib.pad(image, (rowsPadding, colsPadding), 'constant')
 
             shiftx, shifty = getBestShift(image)
@@ -129,13 +133,13 @@ def resize():
             image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/2_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full10.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full18.tiff', cv2.IMREAD_GRAYSCALE)
+clear()
 crop(full)
 segment()
 resize()
-# clear()
