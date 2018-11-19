@@ -30,11 +30,11 @@ def crop(img):
     x1 = 0
     x2 = 820
     h, w = (0, 0)
-    main_region = img[700:1677, 1060:1880]
+    main_region = img[720:1677, 1060:1880]
 
     for no in range(1, 9):
         roi = main_region[y1 + h:120 + h, x1:x2]
-        h += 120
+        h += 123
         cv2.imwrite("./data/roi/roi_"+str(no)+".png", roi)
 
 # Segments the 8 regions of interests into digits using OpenCV contour function
@@ -62,13 +62,14 @@ def segment():
                     x, y, w, h = cv2.boundingRect(cnt)
                     if (h > 20 and w > 20):
                         cv2.rectangle(image, (x, y), (x+w, y+h),
-                                      (0, 0, 255), 1)
+                                      (255, 255, 255), 1)
                         digit = image[y:y+h, x:x+w]
                         # cv2.imshow('Regions of Interests', image)
                         cv2.imwrite("./data/digits/" +
                                     str(region) + "_"+str(i)+".png", digit)
             # cv2.waitKey(0)
             # cv2.destroyAllWindows()
+
 
 def getBestShift(img):
     cy, cx = ndimage.measurements.center_of_mass(img)
@@ -133,12 +134,12 @@ def resize():
             image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/2_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/3_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full18.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full3.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
