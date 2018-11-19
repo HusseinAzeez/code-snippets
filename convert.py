@@ -1,11 +1,11 @@
 from PIL import Image
 import numpy as np
-import sys
 import os
 import csv
-import pandas
 
 # Useful function
+
+
 def createFileList(myDir, format='.png'):
     fileList = []
     print(myDir)
@@ -16,8 +16,10 @@ def createFileList(myDir, format='.png'):
                 fileList.append(fullName)
     return fileList
 
+
 # load the original image
-myFileList = createFileList('./data/preprocessed/')
+myFileList = createFileList('../training set/')
+myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
 for file in myFileList:
     print(file)
