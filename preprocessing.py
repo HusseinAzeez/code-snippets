@@ -134,12 +134,12 @@ def resize():
             image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/3_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/10_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full3.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full10.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
