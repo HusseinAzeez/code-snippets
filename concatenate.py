@@ -8,9 +8,9 @@ def concatenate(outfile="./training.csv"):
     fileList = glob.glob('../mnist-in-csv/*.csv')
     dfList = []
     colnames = []
+    colnames.append('label')
     for no in range(0, 784):
         colnames.append('pixel ' + str(no))
-    colnames.append('label')
 
     for filename in fileList:
         df = pd.read_csv(filename, header=None)
