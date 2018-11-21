@@ -7,10 +7,10 @@ import glob
 import pathlib
 import math
 from scipy import ndimage
-# Delete existed images from last PDF
 
 
 def clear():
+    # Delete existed images from last PDF
     for file in glob.glob("./data/digits/*.png"):
         path = pathlib.Path(file)
         path.unlink()
@@ -21,10 +21,9 @@ def clear():
         path = pathlib.Path(file)
         path.unlink()
 
-# Crops the full image into 8 regions of interests by using fixed coordinates
-
 
 def crop(img):
+    # Crops the full image into 8 regions of interests by using fixed coordinates
     y1 = 5
     y2 = 977
     x1 = 0
@@ -37,10 +36,9 @@ def crop(img):
         h += 123
         cv2.imwrite("./data/roi/roi_"+str(no)+".png", roi)
 
-# Segments the 8 regions of interests into digits using OpenCV contour function
-
 
 def segment():
+    # Segments the 8 regions of interests into digits using OpenCV contour function
     for region in range(1, 9):
         # read the image
         image = cv2.imread("./data/roi/roi_" + str(region) +
@@ -134,12 +132,12 @@ def resize():
             image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/10_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/19_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full10.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full19.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
