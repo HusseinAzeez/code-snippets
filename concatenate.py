@@ -21,6 +21,3 @@ def concatenate(outfile="./training.csv"):
 
 
 concatenate()
-
-df = pd.read_csv('./training.csv')
-print(df.iloc[:-1])
