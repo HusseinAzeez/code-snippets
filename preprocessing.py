@@ -40,7 +40,6 @@ def crop(img):
 def segment():
     # Segments the 8 regions of interests into digits using OpenCV contour function
     for region in range(1, 9):
-        # read the image
         image = cv2.imread("./data/roi/roi_" + str(region) +
                            ".png", cv2.IMREAD_UNCHANGED)
         if (image is not None):
@@ -132,12 +131,12 @@ def resize():
             image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/19_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/15_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full19.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full5.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
