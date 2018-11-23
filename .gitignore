@@ -3,3 +3,12 @@ test.csv
 test.py
 sort.py
 pdf2tiff.py
+files.txt
+training3.csv
+model_js/model.json
+model2_js/group1-shard1of1
+model2_js/group2-shard1of1
+model2_js/group3-shard1of2
+model2_js/group3-shard2of2
+model2_js/group4-shard1of1
+model2_js/model.json
