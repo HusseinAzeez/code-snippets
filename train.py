@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+from sklearn.model_selection import train_test_split
 import keras
 import pandas as pd
 from keras.datasets import mnist
@@ -12,19 +12,23 @@ from keras import backend as K
 import tensorflowjs as tfjs
 
 batch_size = 128
-num_classes = 100
-epochs = 15
+num_classes = 10
+epochs = 12
 
 # input image dimensions
-img_rows, img_cols = 28, 28
+img_rows, img_cols = 64, 64
 
 # the data, split between train and test sets
-train = pd.read_csv('./training.csv')
-test = pd.read_csv('./test.csv')
-x_train = train.iloc[:, 1:785].values
-y_train = train.iloc[:, 0].values
-x_test = test.iloc[:, 1:785].values
-y_test = test.iloc[:, 0].values
+train = pd.read_csv('./training2.csv')
+x = train.iloc[:, 1:785].values
+y = train.iloc[:, 0].values
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.1, random_state=0)
+print(x_train, x_test.shape, y_train, y_test.shape)
+# x_train = train.iloc[:, 1:785].values
+# y_train = train.iloc[:, 0].values
+# x_test = test.iloc[:, 1:785].values
+# y_test = test.iloc[:, 0].values
 
 
 if K.image_data_format() == 'channels_first':
@@ -49,11 +53,12 @@ y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
+model.add(Conv2D(64, kernel_size=(7, 7),
                  activation='relu',
                  input_shape=input_shape))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(Conv2D(128, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(3, 3)))
 model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
@@ -79,4 +84,4 @@ print(model.summary())
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
-tfjs.converters.save_keras_model(model, "./model2_js")
+tfjs.converters.save_keras_model(model, "./model3_js")
