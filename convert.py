@@ -2,7 +2,8 @@ from PIL import Image
 import numpy as np
 import os
 import csv
-
+from tqdm import tqdm
+import pandas as pd
 # Useful function
 
 
@@ -18,12 +19,11 @@ def createFileList(myDir, format='.png'):
 
 
 # load the original image
-myFileList = createFileList('../traningset2 ')
+myFileList = createFileList('../NIST double/00/')
 myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
-for file in myFileList:
-    print(file)
-    with open("files.txt", "a") as txt:
+for file in tqdm(myFileList):
+    with open("full_double_files.txt", "a") as txt:
         txt.write(file + "\n")
 
     img = Image.open(file)
@@ -37,6 +37,11 @@ for file in myFileList:
     value = np.asarray(img.getdata(), dtype=np.int).reshape(
         (img.size[1], img.size[0]))
     value = value.flatten()
-    with open("training3.csv", 'a') as f:
+    value[0] = 00
+
+    with open("full_double.csv", 'a') as f:
         writer = csv.writer(f)
         writer.writerow(value)
+
+print(value.shape)
+print(value)
