@@ -29,8 +29,8 @@ def crop(img):
     x1 = 0
     x2 = 820
     h, w = (0, 0)
-    main_region = img[720:1677, 1060:1880]
-
+    main_region = img[720:1677, 1100:2100]
+    # date_region = img[720:1677, 135:385]
     for no in range(1, 9):
         roi = main_region[y1 + h:120 + h, x1:x2]
         h += 123
@@ -45,7 +45,7 @@ def segment():
         if (image is not None):
             blur = cv2.GaussianBlur(image, (15, 15), 0)
             thresh = cv2.adaptiveThreshold(
-                blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 75, 13)
+                blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 75, 10)
             bit = cv2.bitwise_not(thresh)
             _, contours, hierarchy = cv2.findContours(
                 bit, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
@@ -61,11 +61,8 @@ def segment():
                         cv2.rectangle(image, (x, y), (x+w, y+h),
                                       (255, 255, 255), 1)
                         digit = image[y:y+h, x:x+w]
-                        # cv2.imshow('Regions of Interests', image)
                         cv2.imwrite("./data/digits/" +
                                     str(region) + "_"+str(i)+".png", digit)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
 
 
 def getBestShift(img):
@@ -91,52 +88,52 @@ def resize():
         image = cv2.imread(img, cv2.IMREAD_UNCHANGED)
         if (image is not None):
             # resize the images and invert it (black background)
-            image = cv2.resize(255 - image, (28, 28))
+            image = cv2.resize(image, (64, 64))
 
-            while np.sum(image[0]) == 0:
-                image = image[1:]
+            # while np.sum(image[0]) == 0:
+            #     image = image[1:]
 
-            while np.sum(image[:, 0]) == 0:
-                image = np.delete(image, 0, 1)
+            # while np.sum(image[:, 0]) == 0:
+            #     image = np.delete(image, 0, 1)
 
-            while np.sum(image[-1]) == 0:
-                image = image[:-1]
+            # while np.sum(image[-1]) == 0:
+            #     image = image[:-1]
 
-            while np.sum(image[:, -1]) == 0:
-                image = np.delete(image, -1, 1)
+            # while np.sum(image[:, -1]) == 0:
+            #     image = np.delete(image, -1, 1)
 
-            rows, cols = image.shape
+            # rows, cols = image.shape
 
-            if rows > cols:
-                factor = 20.0/rows
-                rows = 20
-                cols = int(round(cols*factor))
-                # first cols than rows
-                image = cv2.resize(image, (cols, rows))
-            else:
-                factor = 20.0/cols
-                cols = 20
-                rows = int(round(rows*factor))
-                # first cols than rows
-                image = cv2.resize(image, (cols, rows))
+            # if rows > cols:
+            #     factor = 20.0/rows
+            #     rows = 20
+            #     cols = int(round(cols*factor))
+            #     # first cols than rows
+            #     image = cv2.resize(image, (cols, rows))
+            # else:
+            #     factor = 20.0/cols
+            #     cols = 20
+            #     rows = int(round(rows*factor))
+            #     # first cols than rows
+            #     image = cv2.resize(image, (cols, rows))
 
-            colsPadding = (int(math.ceil((28-cols)/2.0)),
-                           int(math.floor((28-cols)/2.0)))
-            rowsPadding = (int(math.ceil((28-rows)/2.0)),
-                           int(math.floor((28-rows)/2.0)))
-            image = np.lib.pad(image, (rowsPadding, colsPadding), 'constant')
+            # colsPadding = (int(math.ceil((28-cols)/2.0)),
+            #                int(math.floor((28-cols)/2.0)))
+            # rowsPadding = (int(math.ceil((28-rows)/2.0)),
+            #                int(math.floor((28-rows)/2.0)))
+            # image = np.lib.pad(image, (rowsPadding, colsPadding), 'constant')
 
-            shiftx, shifty = getBestShift(image)
-            shifted = shift(image, shiftx, shifty)
-            image = shifted
+            # shiftx, shifty = getBestShift(image)
+            # shifted = shift(image, shiftx, shifty)
+            # image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/15_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/31_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full5.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full31.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
