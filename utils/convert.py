@@ -19,7 +19,7 @@ def createFileList(myDir, format='.png'):
 
 
 def convert():
-    for i in range(0, 100):
+    for i in range(10, 100):
         if (i < 10):
             # load the original images from 0-9
             myFileList = createFileList("../NIST double/0"+str(i)+"/")
@@ -27,11 +27,13 @@ def convert():
             # load the original images from 10-99
             myFileList = createFileList("../NIST double/"+str(i)+"/")
 
+        # myFileList = createFileList(
+        #     "../NIST single/"+str(i)+"/train_"+str(i)+"/")
         # Sorted files are easier to label
         myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
         for file in tqdm(myFileList):
-            with open("full_double_files.txt", "a") as txt:
+            with open("full_length_files.txt", "a") as txt:
                 txt.write(file + "\n")
 
             # Open the image
@@ -45,10 +47,10 @@ def convert():
             value = value.flatten()
 
             # Add the label
-            value = np.hstack([i, value])
+            value = np.hstack([2, value])
 
             # Write the images to csv
-            with open("full_double.csv", 'a') as f:
+            with open("full_length.csv", 'a') as f:
                 writer = csv.writer(f)
                 writer.writerow(value)
 
