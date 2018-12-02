@@ -19,16 +19,12 @@ epochs = 12
 img_rows, img_cols = 64, 64
 
 # the data, split between train and test sets
-train = pd.read_csv('./training2.csv')
+train = pd.read_csv('./datasets/training2.csv')
 x = train.iloc[:, 1:785].values
 y = train.iloc[:, 0].values
 x_train, x_test, y_train, y_test = train_test_split(
     x, y, test_size=0.1, random_state=0)
 print(x_train, x_test.shape, y_train, y_test.shape)
-# x_train = train.iloc[:, 1:785].values
-# y_train = train.iloc[:, 0].values
-# x_test = test.iloc[:, 1:785].values
-# y_test = test.iloc[:, 0].values
 
 
 if K.image_data_format() == 'channels_first':
@@ -44,7 +40,7 @@ x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_train /= 255
 x_test /= 255
-print('x_train shape:', x_train.shape)
+
 print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
 
@@ -72,15 +68,15 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 tensor_board = TensorBoard(
     log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
 
-# model.fit(x_train, y_train,
-#           batch_size=batch_size,
-#           epochs=epochs,
-#           verbose=1,
-#           validation_data=(x_test, y_test),
-#           callbacks=[tensor_board])
+model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=epochs,
+          verbose=1,
+          validation_data=(x_test, y_test),
+          callbacks=[tensor_board])
 
 score = model.evaluate(x_test, y_test, verbose=0)
-print(model.summary())
+
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
