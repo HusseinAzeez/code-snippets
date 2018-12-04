@@ -21,7 +21,7 @@ def load_data():
     img_rows, img_cols = 64, 64
 
     # Read the entire dataset
-    dataset = pd.read_csv('./datasets/part_length.csv')
+    dataset = pd.read_csv('./datasets/full_length.csv')
 
     # Print out the shape of the dataset
     print('Dataset Shape: ', dataset.shape)
@@ -115,9 +115,9 @@ def create_model(weights_path=None):
 
     loss1_classifier_act = Activation('softmax', name='prob')(loss1_classifier)
 
-    leNet = Model(inputs=input, outputs=loss1_classifier_act)
+    model = Model(inputs=input, outputs=loss1_classifier_act)
 
-    return leNet
+    return model
 
 
 def train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test):
