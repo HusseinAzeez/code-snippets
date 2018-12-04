@@ -1,5 +1,5 @@
 import keras
-from keras.layers import Input, Dense, Convolution2D, MaxPooling2D, AveragePooling2D, ZeroPadding2D, Dropout, Flatten, merge, Reshape, Activation
+from keras.layers import Input, Dense, Convolution2D, MaxPooling2D, ZeroPadding2D, Dropout, Flatten, Reshape, Activation
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.callbacks import TensorBoard
@@ -21,7 +21,7 @@ def load_data():
     img_rows, img_cols = 64, 64
 
     # Read the entire dataset
-    dataset = pd.read_csv('./datasets/full_single.csv')
+    dataset = pd.read_csv('./datasets/full_single_mix.csv')
 
     # Print out the shape of the dataset
     print('Dataset Shape: ', dataset.shape)
@@ -76,7 +76,7 @@ def load_data():
     y_test = keras.utils.to_categorical(y_test, num_classes)
 
     # Return the datasets
-    return x_train, x_test, x_val, y_val, y_train, y_test
+    return x_train, y_train, x_val, y_val, x_test, y_test
 
 
 def create_model(weights_path=None):
@@ -156,14 +156,14 @@ def train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test):
 
 
 if __name__ == "__main__":
-    x_train, x_test, x_val, y_val, y_train, y_test = load_data()
+    x_train, y_train, x_val, y_val, x_test, y_test = load_data()
     model = create_model()
     train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test)
 
     # Save the model as h5 format
-    model.save('./models/single.h5')
+    model.save('./models/single_mix.h5')
 
     # Convert the Keras model to TensoflowJs model
-    tfjs.converters.save_keras_model(model, "./models/model_single_js")
+    tfjs.converters.save_keras_model(model, "./models/model_single_mix_js")
 
     print("Saved model to disk")
