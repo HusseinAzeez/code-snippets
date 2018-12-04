@@ -83,28 +83,28 @@ def create_model(weights_path=None):
 
     input = Input(shape=(1, 64, 64))
 
-    conv1_7x7_s2 = Convolution2D(64, kernel_size=(
-        7, 7), strides=3, padding='same', activation='relu', name='conv1/7x7_s2')(input)
+    conv1_7x7_s3 = Convolution2D(64, kernel_size=(
+        7, 7), strides=3, padding='same', activation='relu', name='conv1/7x7_s3')(input)
 
-    conv1_zero_pad = ZeroPadding2D(padding=(1, 1))(conv1_7x7_s2)
+    conv1_zero_pad = ZeroPadding2D(padding=(1, 1))(conv1_7x7_s3)
 
     pool1_helper = PoolHelper()(conv1_zero_pad)
 
-    pool1_3x3_s1 = MaxPooling2D(pool_size=(
-        3, 3), strides=2, padding='same', name='pool1/3x3_s1')(pool1_helper)
+    pool1_3x3_s2 = MaxPooling2D(pool_size=(
+        3, 3), strides=2, padding='same', name='pool1/3x3_s2')(pool1_helper)
 
-    pool1_norm1 = LRN2D(name='pool1/norm1')(pool1_3x3_s1)
+    pool1_norm1 = LRN2D(name='pool1/norm1')(pool1_3x3_s2)
 
-    conv2_3x3_reduce = Convolution2D(128, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
-                                     name='conv2/3x3_reduce')(pool1_norm1)
+    conv2_3x3_s1 = Convolution2D(128, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
+                                 name='conv2_3x3_s1')(pool1_norm1)
 
-    conv2_3x3 = Convolution2D(32, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
-                              name='conv2/3x3')(conv2_3x3_reduce)
+    conv3_3x3_s1 = Convolution2D(32, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
+                                 name='conv3_3x3_s1')(conv2_3x3_s1)
 
-    pool2_3x3_s1 = MaxPooling2D(pool_size=(
-        3, 3), strides=2, padding='same', name='pool2/3x3_s1')(conv2_3x3)
+    pool2_3x3_s2 = MaxPooling2D(pool_size=(
+        3, 3), strides=2, padding='same', name='pool2_3x3_s2')(conv3_3x3_s1)
 
-    loss1_flat = Flatten()(pool2_3x3_s1)
+    loss1_flat = Flatten()(pool2_3x3_s2)
 
     loss1_fc = Dense(128, activation='relu', name='loss1/fc')(loss1_flat)
 
@@ -114,9 +114,9 @@ def create_model(weights_path=None):
 
     loss1_classifier_act = Activation('softmax', name='prob')(loss1_classifier)
 
-    leNet = Model(inputs=input, outputs=loss1_classifier_act)
+    model = Model(inputs=input, outputs=loss1_classifier_act)
 
-    return leNet
+    return model
 
 
 def train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test):
@@ -161,9 +161,8 @@ if __name__ == "__main__":
     train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test)
 
     # Save the model as h5 format
-    model.save('./models/single_mix.h5')
+    model.save('./models/single_mix2.h5')
 
     # Convert the Keras model to TensoflowJs model
-    tfjs.converters.save_keras_model(model, "./models/model_single_mix_js")
-
+    tfjs.converters.save_keras_model(model, "./models/model_single_mix2_js")
     print("Saved model to disk")
