@@ -3,15 +3,5 @@ Graph/
 datasets/
 sort.py
 pdf2tiff.py
-training3.csv
-training2.csv
-full_double.csv
-full_double_files.txt
-full_single_files.txt
-full_single.csv
-training3-full.csv
 __pycache__/custom_layers.cpython-36.pyc
-full_length_files.txt
-full_length.csv
-part_length_files.txt
-part_length.csv
+
