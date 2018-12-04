@@ -1,18 +1,34 @@
-import keras
 from keras.models import Model, load_model
 from keras import backend as K
 import numpy as np
-import pandas as pd
 import cv2
+from tqdm import tqdm
 import glob
+import os
 from custom_layers import PoolHelper, LRN2D
+
+
+def createFileList(myDir, format='.png'):
+    # Useful function
+    fileList = []
+    print(myDir)
+    for root, dirs, files in os.walk(myDir, topdown=False):
+        for name in files:
+            if name.endswith(format):
+                fullName = os.path.join(root, name)
+                fileList.append(fullName)
+    return fileList
+
 
 img_rows, img_cols = 64, 64
 
-model = load_model('./models/single.h5',
+model = load_model('./models/single_mix.h5',
                    custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
 
-for file in glob.glob("./data/preprocessed/*.png"):
+myFileList = createFileList("./data/preprocessed/")
+myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+
+for file in myFileList:
     # # read the image
     img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
 
