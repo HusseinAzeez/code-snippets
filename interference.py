@@ -22,7 +22,7 @@ def createFileList(myDir, format='.png'):
 
 img_rows, img_cols = 64, 64
 
-model = load_model('./models/single_mix.h5',
+model = load_model('./models/single_mix2.h5',
                    custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
 
 myFileList = createFileList("./data/preprocessed/")
