@@ -30,46 +30,43 @@ def createFileList(myDir, format='.png'):
     return fileList
 
 
-def convert(mode):
-    if (mode == 'double'):
-        for i in range(0, 100):
-            if (i < 10):
-                # load the original images from 0-9
-                myFileList = createFileList("../NIST double/0"+str(i)+"/")
-            else:
-                # load the original images from 10-99
-                myFileList = createFileList("../NIST double/"+str(i)+"/")
-    else:
-        for i in range(0, 10):
-            myFileList = createFileList(
-                "../NIST single/"+str(i)+"/train_"+str(i)+"/")
+def convert():
+    for i in range(0, 10):
+        # if (i < 10):
+        #     # load the original images from 0-9
+        #     myFileList = createFileList("../NIST double/0"+str(i)+"/")
+        # else:
+        #     # load the original images from 10-99
+        #     myFileList = createFileList("../NIST double/"+str(i)+"/")
 
-    # Sorted files are easier to label
-    myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+        myFileList = createFileList(
+            "../NIST single/"+str(i)+"/train_"+str(i)+"/")
+        # Sorted files are easier to label
+        myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
-    for file in tqdm(myFileList):
-        with open("full_single_mix_files.txt", "a") as txt:
-            txt.write(file + "\n")
+        for file in tqdm(myFileList):
+            with open("full_single_mix_files.txt", "a") as txt:
+                txt.write(file + "\n")
 
-        # Open the image
-        img = Image.open(file)
+            # Open the image
+            img = Image.open(file)
 
-        # Store the image as numpy array
-        value = np.asarray(img.getdata(), dtype=np.int).reshape(
-            (img.size[1], img.size[0]))
+            # Store the image as numpy array
+            value = np.asarray(img.getdata(), dtype=np.int).reshape(
+                (img.size[1], img.size[0]))
 
-        # Flatten image into one row
-        value = value.flatten()
+            # Flatten image into one row
+            value = value.flatten()
 
-        # Add the label
-        value = np.hstack([i, value])
+            # Add the label
+            value = np.hstack([i, value])
 
-        # Write the images to csv
-        with open("full_single_mix.csv", 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(value)
+            # Write the images to csv
+            with open("full_single_mix.csv", 'a') as f:
+                writer = csv.writer(f)
+                writer.writerow(value)
 
-    print('Current file values:', value)
+        print('Current file values:', value)
 
 
-convert(mode='single')
+convert()
