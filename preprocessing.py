@@ -24,12 +24,13 @@ def clear():
 
 def crop(img):
     # Crops the full image into 8 regions of interests by using fixed coordinates
-    y1 = 5
+    y1 = 0
     y2 = 977
     x1 = 0
-    x2 = 820
+    x2 = 900
     h, w = (0, 0)
-    main_region = img[700:1677, 1070:2010]
+    main_region = img[720:1677, 1040:1880]
+    cv2.imwrite("./data/roi/main_region.png", main_region)
     # date_region = img[720:1677, 135:385]
     for no in range(1, 9):
         roi = main_region[y1 + h:120 + h, x1:x2]
@@ -114,7 +115,7 @@ def resize():
                            int(math.floor((64-cols)/2.0)))
             rowsPadding = (int(math.ceil((64-rows)/2.0)),
                            int(math.floor((64-rows)/2.0)))
-            print(rowsPadding, colsPadding)
+            # print(rowsPadding, colsPadding)
             image = np.lib.pad(image, (rowsPadding, colsPadding),
                                'constant', constant_values=255)
             # shiftx, shifty = getBestShift(image)
@@ -122,12 +123,12 @@ def resize():
             # image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/41_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/48_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full41.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full48.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
