@@ -9,6 +9,30 @@ import math
 from scipy import ndimage
 
 
+def sort_contours(cnts, method="left-to-right"):
+    # initialize the reverse flag and sort index
+    reverse = False
+    i = 0
+
+    # handle if we need to sort in reverse
+    if method == "right-to-left" or method == "bottom-to-top":
+        reverse = True
+
+    # handle if we are sorting against the y-coordinate rather than
+    # the x-coordinate of the bounding box
+    if method == "top-to-bottom" or method == "bottom-to-top":
+        i = 1
+
+    # construct the list of bounding boxes and sort them from top to
+    # bottom
+    boundingBoxes = [cv2.boundingRect(c) for c in cnts]
+    (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
+                                        key=lambda b: b[1][i], reverse=reverse))
+
+    # return the list of sorted contours and bounding boxes
+    return (cnts, boundingBoxes)
+
+
 def clear():
     # Delete existed images from last PDF
     for file in glob.glob("./data/digits/*.png"):
@@ -29,7 +53,7 @@ def crop(img):
     x1 = 0
     x2 = 900
     h, w = (0, 0)
-    main_region = img[720:1677, 1040:1880]
+    main_region = img[720:1690, 1080:1900]
     cv2.imwrite("./data/roi/main_region.png", main_region)
     # date_region = img[720:1677, 135:385]
     for no in range(1, 9):
@@ -60,7 +84,7 @@ def segment():
                     x, y, w, h = cv2.boundingRect(cnt)
                     if (h > 20 and w > 20):
                         # cv2.rectangle(image, (x, y), (x+w, y+h),
-                        #               (255, 255, 255), 1)
+                        #               (0, 0, 255), 1)
                         cv2.imshow('image', image)
                         digit = image[y:y+h, x:x+w]
                         cv2.imwrite("./data/digits/" +
@@ -99,13 +123,13 @@ def resize():
             rows, cols = image.shape
 
             if rows > cols:
-                factor = 28.0/rows
+                factor = 38.0/rows
                 rows = 28
                 cols = int(round(cols*factor))
                 # first cols than rows
                 image = cv2.resize(image, (cols, rows))
             else:
-                factor = 28.0/cols
+                factor = 38.0/cols
                 cols = 28
                 rows = int(round(rows*factor))
                 # first cols than rows
@@ -123,12 +147,12 @@ def resize():
             # image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/48_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/50_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full48.tiff', cv2.IMREAD_GRAYSCALE)
+full = cv2.imread('../raw/full50.tiff', cv2.IMREAD_GRAYSCALE)
 clear()
 crop(full)
 segment()
