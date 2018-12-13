@@ -165,4 +165,5 @@ if __name__ == "__main__":
 
     # Convert the Keras model to TensoflowJs model
     tfjs.converters.save_keras_model(model, "./models/model_single_mix2_js")
+
     print("Saved model to disk")

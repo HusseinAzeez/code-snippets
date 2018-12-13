@@ -2,7 +2,7 @@ import keras
 from keras.layers import Input, Dense, Convolution2D, MaxPooling2D, AveragePooling2D, ZeroPadding2D, Dropout, Flatten, merge, Reshape, Activation
 from keras.models import Model
 from keras.optimizers import SGD
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras import backend as K
 from custom_layers import PoolHelper, LRN2D
 from sklearn.model_selection import train_test_split, StratifiedKFold
@@ -21,7 +21,7 @@ def load_data():
     img_rows, img_cols = 64, 64
 
     # Read the entire dataset
-    dataset = pd.read_csv('./datasets/full_double.csv')
+    dataset = pd.read_csv('./datasets/full_double2.csv')
 
     # Print out the shape of the dataset
     print('Dataset Shape: ', dataset.shape)
@@ -121,7 +121,7 @@ def create_model(weights_path=None):
 
 def train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test):
     batch_size = 256
-    epochs = 25
+    epochs = 15
 
     # Callbacks
     # Tensorboard callback
@@ -129,8 +129,11 @@ def train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test):
         log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
 
     # Earily stopping callback to prevent the model from overfitting
-    early_stopping = keras.callbacks.EarlyStopping(
+    early_stopping = EarlyStopping(
         monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto')
+
+    model_checkpoint = ModelCheckpoint(
+        filepath='./models/checkpoints/best_double_model.h5', monitor='val_loss', save_best_only=True)
 
     # Setup SGD parameters
     sgd = SGD(lr=0.01, decay=5e-4, momentum=0.9)
@@ -145,7 +148,7 @@ def train_evaluate_model(model, x_train, y_train, x_val, y_val, x_test, y_test):
               epochs=epochs,
               verbose=1,
               validation_data=(x_val, y_val),
-              callbacks=[tensor_board, early_stopping])
+              callbacks=[tensor_board, early_stopping, model_checkpoint])
 
     # Test the model
     score = model.evaluate(x_test, y_test, verbose=0)
