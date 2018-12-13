@@ -22,9 +22,10 @@ def createFileList(myDir, format='.png'):
 
 img_rows, img_cols = 64, 64
 
-model = load_model('./models/single_mix2.h5',
-                   custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
-
+length_model = load_model('./models/length2.h5',
+                          custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
+single_model = load_model('./models/single_mix2.h5',
+                          custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
 myFileList = createFileList("./data/preprocessed/")
 myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
@@ -42,6 +43,10 @@ for file in myFileList:
     std_px = img.std().astype(np.float32)
     img = (img - mean_px)/(std_px)
 
-    predicaion = model.predict(img)
-    # print(predicaion)
-    print("File=%s, Predicted=%s" % (file, np.argmax(predicaion, axis=1)))
+    # length_predicaion = length_model.predict(img)
+    # print("File=%s, Predicted=%s" %
+    #       (file, np.argmax(length_predicaion, axis=1)))
+    # if (np.argmax(length_predicaion, axis=1) == 0):
+    single_predicaion = single_model.predict(img)
+    print("File=%s, Predicted=%s" %
+          (file, np.argmax(single_predicaion, axis=1)))
