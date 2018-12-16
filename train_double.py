@@ -1,14 +1,14 @@
 import keras
-from keras.layers import Input, Dense, Convolution2D, MaxPooling2D, AveragePooling2D, ZeroPadding2D, Dropout, Flatten, merge, Reshape, Activation
+from keras.layers import Input, Dense, Convolution2D, MaxPooling2D, ZeroPadding2D, Dropout, Flatten, Activation
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras import backend as K
-from custom_layers import PoolHelper, LRN2D
-from sklearn.model_selection import train_test_split, StratifiedKFold
 import tensorflowjs as tfjs
 import numpy as np
 import pandas as pd
+from custom_layers import PoolHelper, LRN2D
+from sklearn.model_selection import train_test_split
 import cv2
 
 
