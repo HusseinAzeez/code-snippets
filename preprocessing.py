@@ -1,12 +1,13 @@
 '''
     Author: Eraser
 '''
-import cv2
-import numpy as np
 import glob
 import pathlib
 import math
+import cv2
+import numpy as np
 from scipy import ndimage
+# from skimage import morphology
 
 
 def sort_contours(cnts, method="left-to-right"):
@@ -25,12 +26,12 @@ def sort_contours(cnts, method="left-to-right"):
 
     # construct the list of bounding boxes and sort them from top to
     # bottom
-    boundingBoxes = [cv2.boundingRect(c) for c in cnts]
-    (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
-                                        key=lambda b: b[1][i], reverse=reverse))
+    bounding_boxes = [cv2.boundingRect(c) for c in cnts]
+    (cnts, bounding_boxes) = zip(*sorted(zip(cnts, bounding_boxes),
+                                         key=lambda b: b[1][i], reverse=reverse))
 
     # return the list of sorted contours and bounding boxes
-    return (cnts, boundingBoxes)
+    return (cnts, bounding_boxes)
 
 
 def clear():
@@ -46,8 +47,12 @@ def clear():
         path.unlink()
 
 
+'''
+Crops the full image into 8 regions of interests by using fixed coordinates
+'''
+
+
 def crop(img):
-    # Crops the full image into 8 regions of interests by using fixed coordinates
     y1 = 0
     y2 = 977
     x1 = 0
@@ -70,16 +75,20 @@ def segment():
         if (image is not None):
             blur = cv2.GaussianBlur(image, (15, 15), 0)
             thresh = cv2.adaptiveThreshold(
-                blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 75, 12)
+                blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 75, 15)
+            # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4, 6))
+            # morph_img = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            # cv2.imshow('Morph', morph_img)
             bit = cv2.bitwise_not(thresh)
-            _, contours, hierarchy = cv2.findContours(
+            _, contours, _ = cv2.findContours(
                 bit, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
 
             # sort contours
-            sort_contours = sorted(contours, key=lambda x: cv2.contourArea(x))
+            contours, bounding_boxes = sort_contours(
+                contours, method="left-to-right")
             # Draw a rectangle for each contour
-            for i in range(0, len(sort_contours)):
-                cnt = sort_contours[i]
+            for i in range(0, len(contours)):
+                cnt = contours[i]
                 if (cv2.contourArea(cnt) > 120):
                     x, y, w, h = cv2.boundingRect(cnt)
                     if (h > 20 and w > 20):
@@ -116,7 +125,7 @@ def resize():
     for img in glob.glob("./data/digits/*.png"):
         # read the image
         image = cv2.imread(img, cv2.IMREAD_UNCHANGED)
-        if (image is not None):
+        if image is not None:
             # resize the images and invert it (black background)
             image = cv2.resize(image, (64, 64))
 
@@ -135,25 +144,25 @@ def resize():
                 # first cols than rows
                 image = cv2.resize(image, (cols, rows))
 
-            colsPadding = (int(math.ceil((64-cols)/2.0)),
-                           int(math.floor((64-cols)/2.0)))
-            rowsPadding = (int(math.ceil((64-rows)/2.0)),
-                           int(math.floor((64-rows)/2.0)))
-            # print(rowsPadding, colsPadding)
-            image = np.lib.pad(image, (rowsPadding, colsPadding),
+            cols_padding = (int(math.ceil((64-cols)/2.0)),
+                            int(math.floor((64-cols)/2.0)))
+            rows_padding = (int(math.ceil((64-rows)/2.0)),
+                            int(math.floor((64-rows)/2.0)))
+
+            image = np.lib.pad(image, (rows_padding, cols_padding),
                                'constant', constant_values=255)
             # shiftx, shifty = getBestShift(image)
             # shifted = shift(image, shiftx, shifty)
             # image = shifted
 
             # save the processed images
-            cv2.imwrite("./data/preprocessed/50_"+str(i)+".png", image)
+            cv2.imwrite("./data/preprocessed/62_"+str(i)+".png", image)
 
         i += 1
 
 
-full = cv2.imread('../raw/full50.tiff', cv2.IMREAD_GRAYSCALE)
+FULL = cv2.imread('../raw/Full/full_62.png', cv2.IMREAD_GRAYSCALE)
 clear()
-crop(full)
+crop(FULL)
 segment()
 resize()
