@@ -4,17 +4,19 @@ import os
 import csv
 from tqdm import tqdm
 import pandas as pd
+import glob
+import cv2
 
 
 def rename(dir=None):
-    i = 24480
+    i = 33719
     for file in glob.glob(dir):
 
         # Read the image
         img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
 
         # Save images
-        cv2.imwrite("../Indy data/5/train_35_"+str(i)+".png", img)
+        cv2.imwrite("../NIST single/9/train_9/train_39_"+str(i) + ".png", img)
         i += 1
 
 
@@ -45,7 +47,7 @@ def convert():
         myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
         for file in tqdm(myFileList):
-            with open("full_single_mix_files.txt", "a") as txt:
+            with open("full_single_mix_files2.txt", "a") as txt:
                 txt.write(file + "\n")
 
             # Open the image
@@ -62,7 +64,7 @@ def convert():
             value = np.hstack([i, value])
 
             # Write the images to csv
-            with open("full_single_mix.csv", 'a') as f:
+            with open("full_single_mix2.csv", 'a') as f:
                 writer = csv.writer(f)
                 writer.writerow(value)
 
@@ -70,3 +72,4 @@ def convert():
 
 
 convert()
+# rename('../Indy data/9/*.png')
