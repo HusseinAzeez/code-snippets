@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 
-class Preporessing():
+class Preprocessing():
     """
         This class convert the pdf into tiff then crop the required
         region segments them and save the digits
@@ -160,7 +160,7 @@ class Preporessing():
 
         return img_bin
 
-    def crop(self, full_image):
+    def crop(self, image):
         '''
             Crops the full image into 8 regions of interests by using fixed coordinates
         '''
@@ -168,17 +168,16 @@ class Preporessing():
         x1 = 0
         x2 = 412
         h = 0
-        main_region = self.text_detection(image=full_image)
+        # full_image = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+        main_region = self.text_detection(image=image)
         main_region = self.deskew_images(image=main_region)
-        main_region = main_region[295:795, 530:945]
-        # For debugging uncomment the below line to see the cropped region
-        # cv2.imshow('main region', main_region)
+        main_region = main_region[305:795, 530:945]
         main_region = self.delete_borders(region=main_region)
         cv2.imwrite('./data/roi/main_region.png', main_region)
 
         for no in range(1, 9):
             roi = main_region[y1 + h:60 + h, x1:x2]
-            h += 65
+            h += 67
             cv2.imwrite("./data/roi/roi_"+str(no)+".png", roi)
 
     @classmethod
@@ -268,7 +267,7 @@ class Preporessing():
                 for (i, cnt) in enumerate(contours):
                     if cv2.contourArea(cnt) > 120:
                         x, y, w, h = cv2.boundingRect(cnt)
-                        if h > 10 and w > 10:
+                        if h > 13 and w > 13:
                             # For debugging uncomment the below line to see all the contours
 
                             # cv2.rectangle(image, (x, y), (x+w, y+h),
@@ -279,13 +278,12 @@ class Preporessing():
                             cv2.imwrite("./data/digits/" +
                                         str(region) + "."+str(i)+".png", digit)
 
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+
+# For debugging uncomment the below code and run the file
 
 
 # if __name__ == '__main__':
-#     full = cv2.imread('../raw/Full/full_54.png', cv2.IMREAD_GRAYSCALE)
-#     preproessing = Preporessing()
+#     preproessing = Preprocessing()
 #     preproessing.clear_images()
-#     preproessing.crop(full_image=full)
+#     preproessing.crop(image='../raw/Full/full_54.png')
 #     preproessing.segment()
