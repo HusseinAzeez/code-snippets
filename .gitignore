@@ -6,3 +6,4 @@ pdf2tiff.py
 __pycache__/custom_layers.cpython-36.pyc
 test.py
 convert.sh
+clinet.py
