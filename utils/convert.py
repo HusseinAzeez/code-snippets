@@ -33,21 +33,21 @@ def createFileList(myDir, format='.png'):
 
 
 def convert():
-    for i in range(0, 10):
-        # if (i < 10):
-        #     # load the original images from 0-9
-        #     myFileList = createFileList("../NIST double/0"+str(i)+"/")
-        # else:
-        #     # load the original images from 10-99
-        #     myFileList = createFileList("../NIST double/"+str(i)+"/")
+    for i in range(0, 100):
+        if (i < 10):
+            # load the original images from 0-9
+            myFileList = createFileList("../NIST double/0"+str(i)+"/")
+        else:
+            # load the original images from 10-99
+            myFileList = createFileList("../NIST double/"+str(i)+"/")
 
-        myFileList = createFileList(
-            "../NIST single/"+str(i)+"/train_"+str(i)+"/")
+        # myFileList = createFileList(
+        #     "../NIST single/"+str(i)+"/train_"+str(i)+"/")
         # Sorted files are easier to label
         myFileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
         for file in tqdm(myFileList):
-            with open("full_single_mix_files2.txt", "a") as txt:
+            with open("full_double_mix_files1.txt", "a") as txt:
                 txt.write(file + "\n")
 
             # Open the image
@@ -64,7 +64,7 @@ def convert():
             value = np.hstack([i, value])
 
             # Write the images to csv
-            with open("full_single_mix2.csv", 'a') as f:
+            with open("full_double_mix1.csv", 'a') as f:
                 writer = csv.writer(f)
                 writer.writerow(value)
 
