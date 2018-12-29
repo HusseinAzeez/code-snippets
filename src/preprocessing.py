@@ -1,17 +1,21 @@
 '''
     Author: Eraser
 '''
-import glob
+
+# # Standard librray imports
 import pathlib
 import math
+import glob
+
+# Third-part imports
 import cv2
 import numpy as np
 
 
 class Preprocessing():
     """
-        This class convert the pdf into tiff then crop the required
-        region segments them and save the digits
+        This class converts the pdf into tiff, crop the required
+        region, segments them and save the digits
     """
     @classmethod
     def clear_images(cls):
@@ -166,19 +170,23 @@ class Preprocessing():
         '''
         y1 = 0
         x1 = 0
-        x2 = 412
+        x2 = 420
         h = 0
-        # full_image = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
-        main_region = self.text_detection(image=image)
-        main_region = self.deskew_images(image=main_region)
-        main_region = main_region[305:795, 530:945]
-        main_region = self.delete_borders(region=main_region)
-        cv2.imwrite('./data/roi/main_region.png', main_region)
 
-        for no in range(1, 9):
-            roi = main_region[y1 + h:60 + h, x1:x2]
-            h += 67
-            cv2.imwrite("./data/roi/roi_"+str(no)+".png", roi)
+        if image.shape > (500, 500):
+            main_region = self.text_detection(image=image)
+            main_region = self.deskew_images(image=main_region)
+            main_region = main_region[300:795, 530:950]
+            main_region = self.delete_borders(region=main_region)
+            cv2.imwrite('./data/roi/main_region.png', main_region)
+
+            for i in range(1, 9):
+                roi = main_region[y1 + h:65 + h, x1:x2]
+                h += 65
+                cv2.imwrite("./data/roi/roi_{}.png".format(i), roi)
+        else:
+            raise ValueError(
+                'The image size is too small, please selet a valid image.')
 
     @classmethod
     def resize_images(cls, image):
@@ -238,8 +246,8 @@ class Preprocessing():
             Segments the 8 regions of interests into digits using OpenCV contour function
         """
         for region in range(1, 9):
-            image = cv2.imread("./data/roi/roi_" + str(region) +
-                               ".png", cv2.IMREAD_UNCHANGED)
+            image = cv2.imread(
+                "./data/roi/roi_{}.png".format(region), cv2.IMREAD_UNCHANGED)
             if image is not None:
                 blur = cv2.GaussianBlur(image, (15, 15), 0)
                 thresh = cv2.adaptiveThreshold(
@@ -275,15 +283,14 @@ class Preprocessing():
                             # cv2.imshow('Segmented Image', image)
                             digit = image[y:y+h, x:x+w]
                             digit = self.resize_images(digit)
-                            cv2.imwrite("./data/digits/" +
-                                        str(region) + "."+str(i)+".png", digit)
+                            cv2.imwrite(
+                                "./data/digits/{}.{}.png".format(region, i), digit)
 
 
 # For debugging uncomment the below code and run the file
-
-
-# if __name__ == '__main__':
-#     preproessing = Preprocessing()
-#     preproessing.clear_images()
-#     preproessing.crop(image='../raw/Full/full_54.png')
-#     preproessing.segment()
+if __name__ == '__main__':
+    FULL = cv2.imread('../raw/Full/full_62.png', cv2.IMREAD_GRAYSCALE)
+    preproessing = Preprocessing()
+    preproessing.clear_images()
+    preproessing.crop(image=FULL)
+    preproessing.segment()
