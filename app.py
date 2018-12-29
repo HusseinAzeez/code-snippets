@@ -5,7 +5,7 @@
 import re
 import os
 
-# Third-part imports
+# Third-party imports
 import jsonpickle
 import cv2
 import numpy as np
@@ -19,7 +19,7 @@ from src.preprocessing import Preprocessing
 from src.custom_layers import PoolHelper, LRN2D
 
 # Initialize the Flask application
-app = Flask(__name__)
+APP = Flask(__name__)
 
 
 def create_file_list(path, extension='.png'):
@@ -40,6 +40,7 @@ def create_file_list(path, extension='.png'):
             if name.endswith(extension):
                 full_name = os.path.join(root, name)
                 file_list.append(full_name)
+
     return file_list
 
 
@@ -88,26 +89,20 @@ def get_model():
 
         Return:
             l_model: The length model architecture and weights.
-            l_graph: The length model graph.
             s_model: The single model architecture and weights.
-            s_graph: The single model graph.
             d_model: The double model architecture and weights.
-            d_graph: The double model graph.
+            graph: The models graph.
     """
     l_model = load_model(
         './lib/models/length3.h5', custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
-    l_graph = tf.get_default_graph()
-
     s_model = load_model('./lib/models/single_mix3.h5',
                          custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
-    s_graph = tf.get_default_graph()
-
     d_model = load_model('./lib/models/double2.h5',
                          custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
-    d_graph = tf.get_default_graph()
+    graph = tf.get_default_graph()
     print('----------------------------Models are loaded successfully ----------------------------')
 
-    return l_model, l_graph, s_model, s_graph, d_model, d_graph
+    return l_model, s_model, d_model, graph
 
 
 def prepare_images(image):
@@ -128,7 +123,8 @@ def prepare_images(image):
 
 
 # Route http posts to this method
-@app.route('/api/predict', methods=['POST'])
+
+@APP.route('/api/predict', methods=['POST'])
 def predict():
     """
         Performers all the preprocessing (Text detection, deskewing, border deletion,
@@ -140,31 +136,26 @@ def predict():
         Return:
             Response: In a JSON format containing all the predications for the PDF.
     """
+    # Create new dictionary to hold the response
     response = {"success": False}
     response["predictions"] = []
+    # Define the image size (This model trained using a 64x64 px images)
     img_rows, img_cols = 64, 64
-
     # Convert string of image data to uint8
     np_array = np.fromstring(request.data, np.uint8)
     # Decode image
     full = cv2.imdecode(np_array, cv2.IMREAD_GRAYSCALE)
-
     # Image preprocessing (see, preprocessing.py)
     prepare_images(full)
-
     # Create a list containing all the digits
     files = create_file_list('./data/digits')
     # Sort the images inside the list
     files.sort(key=natural_sort)
-
     for file in files:
-
         # Split the file name into region, file name, extention
         region, _, _ = split_filename(file)
-
         # Read the image
         img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
-
         # Checking Kreas backend
         if K.image_data_format() == 'channels_first':
             img = img.reshape(1, 1, img_rows, img_cols)
@@ -175,23 +166,18 @@ def predict():
         mean = img.mean().astype(np.float32)
         std = img.std().astype(np.float32)
         img = (img - mean)/(std)
-
-        # Preform predictions for length model
-        with length_graph.as_default():
-            length_predicaion = length_model.predict(img)
+        # Preform predictions for length model, single model, and double model
+        with GRAPH.as_default():
+            # Predictions for length model
+            length_predicaion = LENGTH_MODEL.predict(img)
             length = np.argmax(length_predicaion, axis=1)
-
-        # Preform predictions for single model
-        with length_graph.as_default():
-            single_predicaion = single_model.predict(img)
+            # Predictions for single model
+            single_predicaion = SINGLE_MODEL.predict(img)
             singles = np.argmax(single_predicaion, axis=1)
-
-        # Preform predictions for double model
-        with double_graph.as_default():
-            double_predicaion = double_model.predict(img)
+            # Predictions for double model
+            double_predicaion = DOUBLE_MODEL.predict(img)
             doubles = np.argmax(double_predicaion, axis=1)
-
-        # Build the response dict to send back to client
+        # Build the response dictionary to send back to client
         for _, len_pred in enumerate(length):
             if len_pred == 0:
                 for _, single in enumerate(singles):
@@ -208,16 +194,48 @@ def predict():
                         res = {'digit': 'region= {} ' ' length= {}' ' double= {}'.format(
                             region, len_pred, double)}
                         response["predictions"].append(res)
-
+    # Set the success flag into true
     response["success"] = True
-
     # Encode response using jsonpickle
-    response_pickled = jsonpickle.encode(response)
+    predication_response = jsonpickle.encode(response)
 
-    return Response(response=response_pickled, status=200, mimetype="application/json")
+    return Response(response=predication_response, status=200, mimetype="application/json")
 
 
-# Start flask app
+@APP.errorhandler(404)
+def error404(error):
+    """
+        Error handler for 404.
+    """
+    error_message = '''Erro code {} This enterd route does not exists.
+    This server has only one route /api/predict'''.format(error)
+    error_response = jsonpickle.encode(error_message)
+    return Response(response=error_response, status=404, mimetype="application/json")
+
+
+@APP.errorhandler(405)
+def error405(error):
+    """
+        Error handler for 405.
+    """
+    error_message = '''Erro code {} The requested HTTP method is not
+    allowed for this server.'''.format(error)
+    error_response = jsonpickle.encode(error_message)
+    return Response(response=error_response, status=405, mimetype="application/json")
+
+
+@APP.errorhandler(500)
+def error500(error):
+    """
+        Error handler for 500.
+    """
+    error_message = '''Erro code {} The image size is too small.
+    Please selet a valid image.'''.format(error)
+    error_response = jsonpickle.encode(error_message)
+    return Response(response=error_response, status=500, mimetype="application/json")
+
+
+# Start flask APP
 if __name__ == '__main__':
-    length_model, length_graph, single_model, single_graph, double_model, double_graph = get_model()
-    app.run(port=5000)
+    LENGTH_MODEL, SINGLE_MODEL, DOUBLE_MODEL, GRAPH = get_model()
+    APP.run(port=5000)
