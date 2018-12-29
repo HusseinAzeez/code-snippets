@@ -1,25 +1,36 @@
-import keras
+"""
+    autour: Eraser (ตะวัน)
+"""
+
+# Third-party imports
 from keras.layers import Input, Dense, Convolution2D, MaxPooling2D
 from keras.layers import ZeroPadding2D, Dropout, Flatten, Activation
 from keras.models import Model
 from keras.optimizers import SGD
+from keras.utils import to_categorical
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from keras import backend as K
 from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
-from custom_layers import PoolHelper, LRN2D
+
+# Local imports
+from src.custom_layers import PoolHelper, LRN2D
 
 
 class SingleModel():
+    """
+        Single digit model
+    """
+
     def __init__(self):
-        """ Single digit model
-        Attributes:
-            batch_size: Number of batch
-            epochs: Number of cycles the model will take for training
-            num_classes: Number of classes in the dataset
-            img_rows: The image rows number
-            img_cols: The image columns number
+        """ Single digit constructor
+            Attributes:
+                batch_size: Number of batch
+                epochs: Number of cycles the model will take for training
+                num_classes: Number of classes in the dataset
+                img_rows: The image rows number
+                img_cols: The image columns number
         """
         self.batch_size = 256
         self.epochs = 20
@@ -32,7 +43,7 @@ class SingleModel():
             Load dataset, split into training, validation, and testing sets
 
             Attributes:
-                path: a path to the dataset
+                path: A path to the dataset
             Return:
                 x_train: training set (features)
                 y_train: training set (label)
@@ -98,16 +109,16 @@ class SingleModel():
         print(x_test.shape[0], 'test samples')
 
         # convert class vectors to binary class matrices
-        y_train = keras.utils.to_categorical(y_train, self.num_classes)
-        y_val = keras.utils.to_categorical(y_val, self.num_classes)
-        y_test = keras.utils.to_categorical(y_test, self.num_classes)
+        y_train = to_categorical(y_train, self.num_classes)
+        y_val = to_categorical(y_val, self.num_classes)
+        y_test = to_categorical(y_test, self.num_classes)
 
         # Return the datasets
-        return x_train, y_train, x_val, y_val, x_test, y_test
+        return x_train, y_train, x_val, y_val, x_test, y_test, input_shape
 
-    def create_model(self):
+    def create_model(self, input_shape):
 
-        img_shape = Input(shape=(1, 64, 64))
+        img_shape = Input(shape=input_shape)
 
         conv1_7x7_s3 = Convolution2D(64, kernel_size=(
             7, 7), strides=3, padding='same', activation='relu', name='conv1/7x7_s3')(img_shape)
@@ -141,16 +152,15 @@ class SingleModel():
         loss1_classifier_act = Activation(
             'softmax', name='prob')(loss1_classifier)
 
-        model = Model(inputs=input, outputs=loss1_classifier_act)
+        model = Model(inputs=img_shape, outputs=loss1_classifier_act)
 
         return model
 
     def train_evaluate_model(self, model, x_train, y_train, x_val, y_val, x_test, y_test):
-
         # Callbacks
         # Tensorboard callback
         tensor_board = TensorBoard(
-            log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
+            log_dir='../lib/Graph', histogram_freq=0, write_graph=True, write_images=True)
 
         # Earily stopping callback to prevent the model from overfitting
         early_stopping = EarlyStopping(
@@ -158,7 +168,7 @@ class SingleModel():
 
         # Checkpoint callback
         model_checkpoint = ModelCheckpoint(
-            './models/checkpoints/best_single_model.h5', monitor='val_loss', save_best_only=True)
+            '../lib/models/checkpoints/best_single_model.h5', monitor='val_loss', save_best_only=True)
 
         # Setup SGD parameters
         sgd = SGD(lr=0.01, decay=5e-4, momentum=0.9)
@@ -177,7 +187,8 @@ class SingleModel():
 
         # Test the model
         score = model.evaluate(x_test, y_test, verbose=0)
-
+        # Save the model as h5 format
+        model.save('../lib/models/single_mix4.h5')
         # Print the prediction for the test set
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
