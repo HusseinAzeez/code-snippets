@@ -1,12 +1,5 @@
-models/
-Graph/
-datasets/
-sort.py
-pdf2tiff.py
-__pycache__/custom_layers.cpython-36.pyc
-test.py
 convert.sh
 client.py
-clinet.py
 .vscode/
 __pycache__/
+lib/datasets/
