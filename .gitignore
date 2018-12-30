@@ -1,3 +1,4 @@
+*.pyc
 convert.sh
 client.py
 .vscode/
