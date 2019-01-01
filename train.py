@@ -48,8 +48,8 @@ def select_model(model_number, dataset_path):
 
 if __name__ == '__main__':
     user_input_path = input(
-        '----------- Please insert a valid dataset path -----------\n path=: ')
-    user_input_model = input('''----------- Please select a model to train -----------\n
+        '\n---------------- Please insert a valid dataset path ----------------\n path=: ')
+    user_input_model = input('''---------------- Please select a model to train ----------------\n
         0: To train the length model\n
         1: To train the single digit model\n
         2: To trian the double digit model\n model: ''')

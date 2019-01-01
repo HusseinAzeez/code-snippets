@@ -1,6 +1,7 @@
 """
-    autour: Eraser (ตะวัน)
+    Autour: Eraser (ตะวัน)
 """
+
 # Standard librray imports
 import re
 import os
@@ -10,6 +11,7 @@ import jsonpickle
 import cv2
 import numpy as np
 from flask import Flask, request, Response
+from flask_cors import CORS
 from keras import backend as K
 from keras.models import load_model
 import tensorflow as tf
@@ -20,14 +22,14 @@ from src.custom_layers import PoolHelper, LRN2D
 
 # Initialize the Flask application
 APP = Flask(__name__)
+CORS(APP, supports_credentials=True)
 
 
 def create_file_list(path, extension='.png'):
-    """
-        Creates a files list containing all the files
+    """Creates a files list containing all the files
         in the specified directory with the provided file extension
 
-        Attributes:
+        Args:
             path: The path to the directory containing the required files
             extension: The files extensions (default: .png)
 
@@ -45,10 +47,9 @@ def create_file_list(path, extension='.png'):
 
 
 def natural_sort(s):
-    """
-        Sort the given list in the way that humans expect.
+    """Sort the given list in the way that humans expect.
 
-        Attributes:
+        Args:
             s: The path to the directory containing the required files
 
         Return:
@@ -60,11 +61,10 @@ def natural_sort(s):
 
 
 def split_filename(path):
-    """
-        Split the provided file paths into (Region corresponding to row order in the original PDF,
+    """Split the provided file paths into (Region corresponding to row order in the original PDF,
         the file name, and the file extension)
 
-        Attributes:
+        Args:
             path: The path to the directory containing the required files.
 
         Return:
@@ -80,11 +80,10 @@ def split_filename(path):
 
 
 def get_model():
-    """
-        Load all the models (length, single, double) weights and architecture
+    """Load all the models (length, single, double) weights and architecture
         from models directory ('./lib/models)
 
-        Attributes:
+        Args:
             None.
 
         Return:
@@ -106,11 +105,10 @@ def get_model():
 
 
 def prepare_images(image):
-    """
-        Performers all the preprocessing (Text detection, deskewing, border deletion,
+    """Performers all the preprocessing (Text detection, deskewing, border deletion,
         region cropping, and segmentation) (See, preporcessing.py)
 
-        Attributes:
+        Args:
             Image: The full image that received through the POST request.
 
         Return:
@@ -126,18 +124,17 @@ def prepare_images(image):
 
 @APP.route('/api/predict', methods=['POST'])
 def predict():
-    """
-        Performers all the preprocessing (Text detection, deskewing, border deletion,
+    """Performers all the preprocessing (Text detection, deskewing, border deletion,
         region cropping, and segmentation) (See, preporcessing.py)
 
-        Attributes:
+        Args:
             None.
 
         Return:
             Response: In a JSON format containing all the predications for the PDF.
     """
     # Create new dictionary to hold the response
-    response = {"success": False}
+    response = {"status": "fail"}
     response["predictions"] = []
     # Define the image size (This model trained using a 64x64 px images)
     img_rows, img_cols = 64, 64
@@ -181,21 +178,24 @@ def predict():
         for _, len_pred in enumerate(length):
             if len_pred == 0:
                 for _, single in enumerate(singles):
-                    res = {'digit': 'region= {} ' ' length= {}' ' single= {}'.format(
-                        region, len_pred, single)}
+                    res = {'row': '{}'.format(region),
+                           'pairs': '{}'.format(len_pred),
+                           'single': '{}'.format(single)}
                     response["predictions"].append(res)
             else:
                 for _, double in enumerate(doubles):
                     if double < 10:
-                        res = {'digit': 'region= %s ' ' length= %d' ' double= %.02d' % (
-                            region, len_pred, double)}
+                        res = {'row': '{}'.format(region),
+                               'pairs': '{}'.format(len_pred),
+                               'double': '%.02d' % (double)}
                         response["predictions"].append(res)
                     else:
-                        res = {'digit': 'region= {} ' ' length= {}' ' double= {}'.format(
-                            region, len_pred, double)}
+                        res = {'row': '{}'.format(region),
+                               'pairs': '{}'.format(len_pred),
+                               'single': '{}'.format(double)}
                         response["predictions"].append(res)
     # Set the success flag into true
-    response["success"] = True
+    response["status"] = "success"
     # Encode response using jsonpickle
     predication_response = jsonpickle.encode(response)
 
@@ -204,19 +204,25 @@ def predict():
 
 @APP.errorhandler(404)
 def error404(error):
-    """
-        Error handler for 404.
+    """Error handler for 404.
+        Args:
+            error: The error code get passed automatically from the app.
+        Return:
+            response: A JSON response containing an error message and the error code.
     """
     error_message = '''Erro code {} This enterd route does not exists.
-    This server has only one route /api/predict'''.format(error)
+    This server has only one route / api/predict'''.format(error)
     error_response = jsonpickle.encode(error_message)
     return Response(response=error_response, status=404, mimetype="application/json")
 
 
 @APP.errorhandler(405)
 def error405(error):
-    """
-        Error handler for 405.
+    """Error handler for 405.
+        Args:
+            error: The error code get passed automatically from the app.
+        Return:
+            response: A JSON response containing an error message and the error code.
     """
     error_message = '''Erro code {} The requested HTTP method is not
     allowed for this server.'''.format(error)
@@ -226,10 +232,13 @@ def error405(error):
 
 @APP.errorhandler(500)
 def error500(error):
+    """Error handler for 500.
+        Args:
+            error: The error code get passed automatically from the app.
+        Return:
+            response: A JSON response containing an error message and the error code.
     """
-        Error handler for 500.
-    """
-    error_message = '''Erro code {} The image size is too small.
+    error_message = '''Erro code {} Image not found or it's too small.
     Please selet a valid image.'''.format(error)
     error_response = jsonpickle.encode(error_message)
     return Response(response=error_response, status=500, mimetype="application/json")
