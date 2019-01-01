@@ -1,9 +1,17 @@
+"""
+    autour: Eraser (ตะวัน)
+"""
+# Standard librray imports
 import os
 import re
+
+# Third-party imports
 from keras.models import load_model
 from keras import backend as K
 import numpy as np
 import cv2
+
+# Local imports
 from custom_layers import PoolHelper, LRN2D
 
 
@@ -58,8 +66,6 @@ def predict(path):
         img = (img - mean_px)/(std_px)
 
         length_predicaion = length_model.predict(img)
-        # print("File=%s => Predicted=%s" %
-        #       (file, np.argmax(length_predicaion, axis=1)))
 
         if np.argmax(length_predicaion, axis=1) == 0:
             single_predicaion = single_model.predict(img)
@@ -75,4 +81,5 @@ def predict(path):
                     file, np.argmax(double_predication, axis=1)))
 
 
-predict('./data/digits')
+if __name__ == '__main__':
+    predict('./data/digits')
