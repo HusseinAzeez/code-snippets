@@ -1,7 +1,8 @@
 client.py
 .vscode/
 datasets/
-
+.pylintrc
+.flaskenv
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
