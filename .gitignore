@@ -1,8 +1,7 @@
-convert.sh
 client.py
 .vscode/
 datasets/
-data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -51,4 +50,4 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
+docs/_build/.DS_Store
