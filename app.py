@@ -178,21 +178,21 @@ def predict():
         for _, len_pred in enumerate(length):
             if len_pred == 0:
                 for _, single in enumerate(singles):
-                    res = {'row': '{}'.format(region),
-                           'pairs': '{}'.format(len_pred),
-                           'single': '{}'.format(single)}
+                    res = {"row": '{}'.format(region),
+                           "pairs": '{}'.format(len_pred),
+                           "single": '{}'.format(single)}
                     response["predictions"].append(res)
             else:
                 for _, double in enumerate(doubles):
                     if double < 10:
-                        res = {'row': '{}'.format(region),
-                               'pairs': '{}'.format(len_pred),
-                               'double': '%.02d' % (double)}
+                        res = {"row": '{}'.format(region),
+                               "pairs": '{}'.format(len_pred),
+                               "double": '%.02d' % (double)}
                         response["predictions"].append(res)
                     else:
-                        res = {'row': '{}'.format(region),
-                               'pairs': '{}'.format(len_pred),
-                               'single': '{}'.format(double)}
+                        res = {"row": '{}'.format(region),
+                               "pairs": '{}'.format(len_pred),
+                               "single": '{}'.format(double)}
                         response["predictions"].append(res)
     # Set the success flag into true
     response["status"] = "success"
@@ -247,4 +247,4 @@ def error500(error):
 # Start flask APP
 if __name__ == '__main__':
     LENGTH_MODEL, SINGLE_MODEL, DOUBLE_MODEL, GRAPH = get_model()
-    APP.run(port=5000)
+    APP.run(host="192.168.1.25", port=5010)
