@@ -1,7 +1,7 @@
 """
-    autour: Eraser (ตะวัน)
+    Autour: Eraser (ตะวัน)
 """
-# Standard librray imports
+# Standard library imports
 import os
 import re
 
@@ -52,7 +52,7 @@ def predict(path):
     files.sort(key=natural_sort)
 
     for file in files:
-            # # read the image
+        # read the image
         img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
 
         if K.image_data_format() == 'channels_first':

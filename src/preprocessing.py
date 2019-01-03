@@ -2,7 +2,7 @@
     Author: Eraser
 '''
 
-# # Standard librray imports
+# Standard library imports
 import pathlib
 import math
 import glob
@@ -10,6 +10,7 @@ import glob
 # Third-part imports
 import cv2
 import numpy as np
+from wand.image import Image
 
 
 class Preprocessing():
@@ -17,6 +18,7 @@ class Preprocessing():
         This class converts the pdf into tiff, crop the required
         region, segments them and save the digits
     """
+
     @classmethod
     def clear_images(cls):
         """
@@ -287,10 +289,10 @@ class Preprocessing():
                                 "./data/digits/{}.{}.png".format(region, i), digit)
 
 
-# For debugging uncomment the below code and run the file
-if __name__ == '__main__':
-    FULL = cv2.imread('../raw/Full/full_62.png', cv2.IMREAD_GRAYSCALE)
-    preproessing = Preprocessing()
-    preproessing.clear_images()
-    preproessing.crop(image=FULL)
-    preproessing.segment()
+# # For debugging uncomment the below code and run the file
+# if __name__ == '__main__':
+#     FULL = cv2.imread('../raw/Full/full_62.png', cv2.IMREAD_GRAYSCALE)
+#     preproessing = Preprocessing()
+#     preproessing.clear_images()
+#     preproessing.crop(image=FULL)
+#     preproessing.segment()

@@ -1,5 +1,5 @@
 """
-    autour: Eraser (ตะวัน)
+    Autour: Eraser (ตะวัน)
 """
 
 # Third-party imports

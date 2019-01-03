@@ -1,17 +1,22 @@
-import cv2
-import glob
-from tqdm import tqdm
-import pathlib
+"""
+    Autour: Eraser (ตะวัน)
+"""
+
+# Standard library imports
 import math
 import os
-import numpy as np
+import glob
+import pathlib
+
+# Third-party imports
+import cv2
+from tqdm import tqdm
 
 
-def createFileList(myDir, format='.png'):
-    # Useful function
+def createFileList(path, format=".png"):
     fileList = []
-    print(myDir)
-    for root, dirs, files in os.walk(myDir, topdown=False):
+    print(path)
+    for root, dirs, files in os.walk(path, topdown=False):
         for name in files:
             if name.endswith(format):
                 fullName = os.path.join(root, name)
@@ -19,8 +24,8 @@ def createFileList(myDir, format='.png'):
     return fileList
 
 
-def resize(mode):
-    if (mode == 'double'):
+def resize(pairs):
+    if (pairs == 'single'):
         for i in range(0, 10):
             myFileList = createFileList(
                 "../NIST single/"+str(i)+"/train_"+str(i)+"/")
@@ -66,7 +71,7 @@ def resize(mode):
         cv2.imwrite(str(img), image)
 
 
-def clear(mode, format):
+def clear(pairs, format):
     if (mode == 'single'):
         for i in range(0, 10):
             # if (i < 10):

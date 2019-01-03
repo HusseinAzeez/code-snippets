@@ -1,10 +1,16 @@
+"""
+    Autour: Eraser (ตะวัน)
+"""
+
+# Standard library imports
+import glob
 from PIL import Image
-import numpy as np
 import os
 import csv
+
+# Third-party imports
 from tqdm import tqdm
-import pandas as pd
-import glob
+import numpy as np
 import cv2
 
 
