@@ -2,7 +2,7 @@
     Autour: Eraser (ตะวัน)
 """
 
-# Standard librray imports
+# Standard library imports
 import re
 import os
 
@@ -10,11 +10,13 @@ import os
 import jsonpickle
 import cv2
 import numpy as np
+import tensorflow as tf
+import requests
 from flask import Flask, request, Response
 from flask_cors import CORS
 from keras import backend as K
 from keras.models import load_model
-import tensorflow as tf
+from wand.image import Image
 
 # Local imports
 from src.preprocessing import Preprocessing
@@ -120,7 +122,33 @@ def prepare_images(image):
     preprocessing.segment()
 
 
-# Route http posts to this method
+def convert_pdf(pdf_path):
+    """Converts locally stored PDF into image.
+
+        Args:
+            paf_path: local path to a PDF for converting it to TIFF format.
+
+        Return:
+            PDF converted into image format.
+    """
+    with Image(filename=pdf_path, resolution=300, format="pdf") as pdf:
+        pdf.convert('tiff')
+
+        return pdf
+
+
+def download_pdf(pdf_url):
+    """Downloads a PDF from a public storage.
+
+        Args:
+            paf_url: link to a downloadable PDF.
+
+        Return:
+            None.
+    """
+    response = requests.get(pdf_url, allow_redirects=True)
+    open('./data/raw/temp.pdf', 'wb').write(response.content)
+
 
 @APP.route('/api/predict', methods=['POST'])
 def predict():
@@ -139,9 +167,12 @@ def predict():
     # Define the image size (This model trained using a 64x64 px images)
     img_rows, img_cols = 64, 64
     # Convert string of image data to uint8
-    np_array = np.fromstring(request.data, np.uint8)
+    # np_array = np.fromstring(request.data, np.uint8)
+    download_pdf(request.data)
+    full = convert_pdf('./data/raw/temp.pdf')
     # Decode image
-    full = cv2.imdecode(np_array, cv2.IMREAD_GRAYSCALE)
+    # full = cv2.imdecode(full, cv2.IMREAD_GRAYSCALE)
+    full = cv2.imread('./temp.tiff', cv2.IMREAD_GRAYSCALE)
     # Image preprocessing (see, preprocessing.py)
     prepare_images(full)
     # Create a list containing all the digits
