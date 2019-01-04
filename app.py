@@ -3,87 +3,32 @@
 """
 
 # Standard library imports
-import re
-import os
+import time
 
 # Third-party imports
 import jsonpickle
 import cv2
 import numpy as np
 import tensorflow as tf
-import requests
 from flask import Flask, request, Response
 from flask_cors import CORS
 from keras import backend as K
 from keras.models import load_model
-from wand.image import Image
 
 # Local imports
-from src.preprocessing import Preprocessing
-from src.custom_layers import PoolHelper, LRN2D
+from src.features.preprocessing import Preprocessing
+from src.models.custom_layers import PoolHelper, LRN2D
+from src.utils.utils import download_pdf, convert_pdf, split_filename
+from src.utils.utils import create_file_list, natural_sort
 
 # Initialize the Flask application
 APP = Flask(__name__)
 CORS(APP, supports_credentials=True)
 
 
-def create_file_list(path, extension='.png'):
-    """Creates a files list containing all the files
-        in the specified directory with the provided file extension
-
-        Args:
-            path: The path to the directory containing the required files
-            extension: The files extensions (default: .png)
-
-        Return:
-            file_list: Python list containing all the files
-    """
-    file_list = []
-    for root, _, files in os.walk(path, topdown=False):
-        for name in files:
-            if name.endswith(extension):
-                full_name = os.path.join(root, name)
-                file_list.append(full_name)
-
-    return file_list
-
-
-def natural_sort(s):
-    """Sort the given list in the way that humans expect.
-
-        Args:
-            s: The path to the directory containing the required files
-
-        Return:
-            file_list: Python list containing all the files
-    """
-    numbers = re.compile('([0-9]+)')
-    return [int(text) if text.isdigit() else text.lower()
-            for text in re.split(numbers, s)]
-
-
-def split_filename(path):
-    """Split the provided file paths into (Region corresponding to row order in the original PDF,
-        the file name, and the file extension)
-
-        Args:
-            path: The path to the directory containing the required files.
-
-        Return:
-            region: The number corsponding to row order in the original PDF.
-            name: The file name (A number).
-            extenstion: File extenstion (Default .png)
-    """
-    filename = os.path.basename(path)
-    name, extension = os.path.splitext(filename)
-    region = name.split('.')[0]
-
-    return region, name, extension
-
-
 def get_model():
     """Load all the models (length, single, double) weights and architecture
-        from models directory ('./lib/models)
+        from models directory ('./models/saved_models)
 
         Args:
             None.
@@ -94,11 +39,11 @@ def get_model():
             d_model: The double model architecture and weights.
             graph: The models graph.
     """
-    l_model = load_model(
-        './lib/models/length3.h5', custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
-    s_model = load_model('./lib/models/single_mix3.h5',
+    l_model = load_model('./models/length_mix.h5',
                          custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
-    d_model = load_model('./lib/models/double2.h5',
+    s_model = load_model('./models/single_mix.h5',
+                         custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
+    d_model = load_model('./models/double_mix.h5',
                          custom_objects={'PoolHelper': PoolHelper(), 'LRN2D': LRN2D()})
     graph = tf.get_default_graph()
     print('----------------------------Models are loaded successfully ----------------------------')
@@ -106,12 +51,12 @@ def get_model():
     return l_model, s_model, d_model, graph
 
 
-def prepare_images(image):
+def prepare_image(image):
     """Performers all the preprocessing (Text detection, deskewing, border deletion,
         region cropping, and segmentation) (See, preporcessing.py)
 
         Args:
-            Image: The full image that received through the POST request.
+            image: The full image that converted from the downloaded PDF.
 
         Return:
             None.
@@ -120,34 +65,6 @@ def prepare_images(image):
     preprocessing.clear_images()
     preprocessing.crop(image)
     preprocessing.segment()
-
-
-def convert_pdf(pdf_path):
-    """Converts locally stored PDF into image.
-
-        Args:
-            paf_path: local path to a PDF for converting it to TIFF format.
-
-        Return:
-            PDF converted into image format.
-    """
-    with Image(filename=pdf_path, resolution=300, format="pdf") as pdf:
-        pdf.convert('tiff')
-
-        return pdf
-
-
-def download_pdf(pdf_url):
-    """Downloads a PDF from a public storage.
-
-        Args:
-            paf_url: link to a downloadable PDF.
-
-        Return:
-            None.
-    """
-    response = requests.get(pdf_url, allow_redirects=True)
-    open('./data/raw/temp.pdf', 'wb').write(response.content)
 
 
 @APP.route('/api/predict', methods=['POST'])
@@ -161,20 +78,20 @@ def predict():
         Return:
             Response: In a JSON format containing all the predications for the PDF.
     """
+    START_TIME = time.time()
     # Create new dictionary to hold the response
     response = {"status": "fail"}
     response["predictions"] = []
     # Define the image size (This model trained using a 64x64 px images)
     img_rows, img_cols = 64, 64
-    # Convert string of image data to uint8
-    # np_array = np.fromstring(request.data, np.uint8)
+    # Downlaod the PDF from the linked send with the request
     download_pdf(request.data)
-    full = convert_pdf('./data/raw/temp.pdf')
-    # Decode image
-    # full = cv2.imdecode(full, cv2.IMREAD_GRAYSCALE)
-    full = cv2.imread('./temp.tiff', cv2.IMREAD_GRAYSCALE)
+    # Convert the PDF into image
+    convert_pdf('./data/raw/full.pdf')
+    # Read the converted image
+    full = cv2.imread('./data/raw/full.tiff', cv2.IMREAD_GRAYSCALE)
     # Image preprocessing (see, preprocessing.py)
-    prepare_images(full)
+    prepare_image(full)
     # Create a list containing all the digits
     files = create_file_list('./data/digits')
     # Sort the images inside the list
@@ -229,7 +146,7 @@ def predict():
     response["status"] = "success"
     # Encode response using jsonpickle
     predication_response = jsonpickle.encode(response)
-
+    print("--- {} seconds ---".format(time.time() - START_TIME))
     return Response(response=predication_response, status=200, mimetype="application/json")
 
 
@@ -275,7 +192,6 @@ def error500(error):
     return Response(response=error_response, status=500, mimetype="application/json")
 
 
-# Start flask APP
 if __name__ == '__main__':
     LENGTH_MODEL, SINGLE_MODEL, DOUBLE_MODEL, GRAPH = get_model()
     APP.run(host="192.168.1.25", port=5010)
