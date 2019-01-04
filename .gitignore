@@ -1,8 +1,8 @@
-client.py
 .vscode/
-datasets/
 .pylintrc
-.flaskenv
+.DS_Store
+data/
+client.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -49,6 +49,3 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-
-# Sphinx documentation
-docs/_build/.DS_Store
